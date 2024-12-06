@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strconv"
 
-	criu "github.com/checkpoint-restore/go-criu/v6/rpc"
+	criu "github.com/checkpoint-restore/go-criu/v7/rpc"
 	"github.com/moby/sys/userns"
 	"github.com/opencontainers/runtime-spec/specs-go"
 	"github.com/sirupsen/logrus"
@@ -40,6 +40,7 @@ checkpointed.`,
 		cli.BoolFlag{Name: "file-locks", Usage: "handle file locks, for safety"},
 		cli.BoolFlag{Name: "pre-dump", Usage: "dump container's memory information only, leave the container running after this"},
 		cli.StringFlag{Name: "manage-cgroups-mode", Value: "", Usage: "cgroups mode: soft|full|strict|ignore (default: soft)"},
+		cli.StringFlag{Name: "network-lock", Value: "", Usage: "network lock method: iptables|nftables|skip (default: iptables)"},
 		cli.StringSliceFlag{Name: "empty-ns", Usage: "create a namespace, but don't restore its properties"},
 		cli.BoolFlag{Name: "auto-dedup", Usage: "enable auto deduplication of memory images"},
 	},
@@ -165,6 +166,19 @@ func criuOptions(context *cli.Context) (*libcontainer.CriuOpts, error) {
 		opts.ManageCgroupsMode = criu.CriuCgMode_IGNORE
 	default:
 		return nil, errors.New("Invalid manage-cgroups-mode value")
+	}
+
+	switch context.String("network-lock") {
+	case "":
+		// do nothing
+	case "iptables":
+		opts.NetworkLockMethod = criu.CriuNetworkLockMethod_IPTABLES
+	case "nftables":
+		opts.NetworkLockMethod = criu.CriuNetworkLockMethod_NFTABLES
+	case "skip":
+		opts.NetworkLockMethod = criu.CriuNetworkLockMethod_SKIP
+	default:
+		return nil, errors.New("Invalid network-lock value")
 	}
 
 	// runc doesn't manage network devices and their configuration.

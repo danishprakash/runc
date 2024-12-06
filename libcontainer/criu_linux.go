@@ -14,8 +14,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/checkpoint-restore/go-criu/v6"
-	criurpc "github.com/checkpoint-restore/go-criu/v6/rpc"
+	"github.com/checkpoint-restore/go-criu/v7"
+	criurpc "github.com/checkpoint-restore/go-criu/v7/rpc"
 	securejoin "github.com/cyphar/filepath-securejoin"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/sys/unix"
@@ -385,6 +385,12 @@ func (c *Container) Checkpoint(criuOpts *CriuOpts) error {
 	if criuOpts.ManageCgroupsMode != 0 {
 		mode := criuOpts.ManageCgroupsMode
 		rpcOpts.ManageCgroupsMode = &mode
+	}
+
+	// set optional network lock method
+	if criuOpts.NetworkLockMethod != 0 {
+		method := criuOpts.NetworkLockMethod
+		rpcOpts.NetworkLock = &method
 	}
 
 	var t criurpc.CriuReqType

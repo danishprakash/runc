@@ -55,6 +55,11 @@ using the runc checkpoint command.`,
 			Usage: "cgroups mode: soft|full|strict|ignore (default: soft)",
 		},
 		cli.StringFlag{
+			Name:  "network-lock",
+			Value: "",
+			Usage: "network lock method: iptables|nftables|skip (default: iptables)",
+		},
+		cli.StringFlag{
 			Name:  "bundle, b",
 			Value: "",
 			Usage: "path to the root of the bundle directory",
